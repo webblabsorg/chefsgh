@@ -60,9 +60,7 @@ export default function Login() {
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
-          <div className="flex justify-between text-xs text-slate-600 pt-1">
-            <a href="/admin/forgot" className="text-teal-700 hover:underline">Forgot password?</a>
-          </div>
+          {/* Forgot password removed */}
         </form>
       </div>
     </div>

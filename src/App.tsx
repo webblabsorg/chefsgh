@@ -39,8 +39,7 @@ function App() {
           />
 
           <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/forgot" element={<ForgotPassword />} />
-          <Route path="/admin/reset" element={<ResetPassword />} />
+          {/* Forgot/Reset password removed */}
 
           <Route
             path="/admin"

@@ -28,10 +28,17 @@ app.set('trust proxy', 1);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const uploadDir = path.resolve(__dirname, '../uploads');
+// Use writable temp dir in serverless; allow override via env
+const uploadDir = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : (process.env.VERCEL ? '/tmp/uploads' : path.resolve(__dirname, '../uploads'));
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (e) {
+  // In serverless read-only FS, creation might fail until first upload handler runs; ignore
 }
 
 const allowedOrigins = process.env.CLIENT_ORIGIN

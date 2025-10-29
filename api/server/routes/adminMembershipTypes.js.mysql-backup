@@ -52,10 +52,10 @@ router.post('/', async (req, res) => {
     const benefits = parseBenefits(b.benefits);
     const [result] = await pool.execute(
       `INSERT INTO membership_types (name, slug, description, price, benefits, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [b.name, b.slug, b.description || null, b.price, JSON.stringify(benefits), b.is_active !== false]
     );
-    const [rows] = await pool.query(`SELECT * FROM membership_types WHERE id = $1`, [result.insertId || b.id]);
+    const [rows] = await pool.query(`SELECT * FROM membership_types WHERE id = ?`, [result.insertId || b.id]);
     try { await logAudit({ action: 'ADMIN_CREATE_MEMBERSHIP_TYPE', entity_type: 'membership_type', entity_id: rows[0]?.id, new_values: { name: b.name, slug: b.slug }, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.status(201).json({ membershipType: rows[0] });
   } catch (err) {
@@ -93,8 +93,8 @@ router.patch('/:id', async (req, res) => {
     }
     if (updates.length === 0) return res.status(400).json({ error: 'No updates' });
     params.push(id);
-    await pool.execute(`UPDATE membership_types SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`, params);
-    const [rows] = await pool.query(`SELECT * FROM membership_types WHERE id = $1`, [id]);
+    await pool.execute(`UPDATE membership_types SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, params);
+    const [rows] = await pool.query(`SELECT * FROM membership_types WHERE id = ?`, [id]);
     try { await logAudit({ action: 'ADMIN_UPDATE_MEMBERSHIP_TYPE', entity_type: 'membership_type', entity_id: id, new_values: body, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.json({ membershipType: rows[0] });
   } catch (err) {

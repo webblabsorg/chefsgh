@@ -55,8 +55,8 @@ async function handleSuccessfulPayment(data) {
       `UPDATE payments 
        SET status = 'completed', 
            paid_at = NOW(),
-           paystack_reference = $1
-       WHERE reference = $2`,
+           paystack_reference = ?
+       WHERE reference = ?`,
       [reference, reference]
     );
 
@@ -65,7 +65,7 @@ async function handleSuccessfulPayment(data) {
       `UPDATE registrations 
        SET status = 'active' 
        WHERE id IN (
-         SELECT registration_id FROM payments WHERE reference = $1
+         SELECT registration_id FROM payments WHERE reference = ?
        )`,
       [reference]
     );
@@ -88,7 +88,7 @@ async function handleFailedPayment(data) {
     await pool.execute(
       `UPDATE payments 
        SET status = 'failed' 
-       WHERE reference = $1`,
+       WHERE reference = ?`,
       [reference]
     );
 

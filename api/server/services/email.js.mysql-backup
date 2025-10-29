@@ -115,7 +115,7 @@ export const sendRegistrationEmail = async (details) => {
 
     await pool.execute(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, sent_at)
-       VALUES ($1, $2, $3, $4, 'sent', NOW())`,
+       VALUES (?, ?, ?, ?, 'sent', NOW())`,
       [details.registrationId ?? null, supportEmail, mailOptions.subject, html]
     );
 
@@ -123,7 +123,7 @@ export const sendRegistrationEmail = async (details) => {
   } catch (error) {
     await pool.execute(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, error_message, created_at)
-       VALUES ($1, $2, $3, $4, 'failed', $5, NOW())`,
+       VALUES (?, ?, ?, ?, 'failed', ?, NOW())`,
       [details.registrationId ?? null, supportEmail, mailOptions.subject, html, error.message]
     );
 
@@ -144,14 +144,14 @@ export const sendHtmlEmail = async ({ to, subject, html, registrationId = null }
     const info = await transporter.sendMail(mailOptions);
     await pool.execute(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, sent_at)
-       VALUES ($1, $2, $3, $4, 'sent', NOW())`,
+       VALUES (?, ?, ?, ?, 'sent', NOW())`,
       [registrationId, mailOptions.to, subject, html]
     );
     return info;
   } catch (error) {
     await pool.execute(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, error_message, created_at)
-       VALUES ($1, $2, $3, $4, 'failed', $5, NOW())`,
+       VALUES (?, ?, ?, ?, 'failed', ?, NOW())`,
       [registrationId, mailOptions.to, subject, html, error.message]
     );
     throw error;

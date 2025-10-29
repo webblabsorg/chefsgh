@@ -10,17 +10,16 @@ export async function seedInitialAdmin() {
     return; // nothing to seed
   }
 
-  const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.execute('SELECT id FROM admin_users WHERE email = ? LIMIT 1', [email]);
+    const { rows } = await pool.query('SELECT id FROM admin_users WHERE email = $1 LIMIT 1', [email]);
     if (rows.length > 0) return; // already exists
 
     const username = email.split('@')[0].slice(0, 50);
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await conn.execute(
+    await pool.query(
       `INSERT INTO admin_users (username, email, password_hash, full_name, role, is_active)
-       VALUES (?, ?, ?, ?, 'admin', TRUE)`,
+       VALUES ($1, $2, $3, $4, 'admin', TRUE)`,
       [username, email, passwordHash, fullName]
     );
 
@@ -28,7 +27,5 @@ export async function seedInitialAdmin() {
     console.log(`Seeded initial admin user: ${email}`);
   } catch (err) {
     console.error('Failed to seed initial admin:', err);
-  } finally {
-    conn.release();
   }
 }

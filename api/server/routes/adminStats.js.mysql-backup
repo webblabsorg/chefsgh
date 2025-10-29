@@ -118,7 +118,7 @@ router.get('/registrations-trend', async (req, res) => {
               COUNT(*) AS registrations,
               COALESCE(SUM(CASE WHEN payment_status = 'success' THEN payment_amount END), 0) AS revenue
        FROM registrations
-       WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL $1 DAY)
+       WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
        GROUP BY DATE(created_at)
        ORDER BY DATE(created_at) ASC`,
       [days]

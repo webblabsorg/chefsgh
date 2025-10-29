@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
        FROM email_notifications
        WHERE ${where}
        ORDER BY COALESCE(sent_at, created_at) DESC
-       LIMIT $1 OFFSET $2`,
+       LIMIT ? OFFSET ?`,
       [...params, pageSize, offset]
     );
 
@@ -54,7 +54,7 @@ router.get('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const [rows] = await pool.query(
-      `SELECT * FROM email_notifications WHERE id = $1 LIMIT 1`,
+      `SELECT * FROM email_notifications WHERE id = ? LIMIT 1`,
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
@@ -69,7 +69,7 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/resend', async (req, res) => {
   try {
     const id = req.params.id;
-    const [rows] = await pool.query(`SELECT * FROM email_notifications WHERE id = $1 LIMIT 1`, [id]);
+    const [rows] = await pool.query(`SELECT * FROM email_notifications WHERE id = ? LIMIT 1`, [id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
     const email = rows[0];
     await sendHtmlEmail({ to: email.recipient_email, subject: `[RESEND] ${email.subject}`, html: email.body, registrationId: email.registration_id });

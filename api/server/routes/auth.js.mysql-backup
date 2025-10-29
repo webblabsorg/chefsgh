@@ -19,7 +19,7 @@ router.post('/login', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, keyGenerato
     const byField = email ? 'email' : 'username';
     const [rows] = await pool.execute(
       `SELECT id, email, username, full_name, password_hash, role, is_active
-       FROM admin_users WHERE ${byField} = $1 LIMIT 1`,
+       FROM admin_users WHERE ${byField} = ? LIMIT 1`,
       [identifier]
     );
     if (rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
@@ -79,7 +79,7 @@ router.post('/forgot', rateLimit({ windowMs: 60 * 60 * 1000, max: 10, keyGenerat
     if (!email) return res.json({ ok: true }); // generic response
 
     const [rows] = await pool.execute(
-      `SELECT id, email, full_name, is_active FROM admin_users WHERE email = $1 LIMIT 1`,
+      `SELECT id, email, full_name, is_active FROM admin_users WHERE email = ? LIMIT 1`,
       [email]
     );
     if (rows.length === 0 || rows[0].is_active === 0) {

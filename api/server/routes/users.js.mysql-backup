@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
        FROM users u
        WHERE ${where}
        ORDER BY u.created_at DESC
-       LIMIT $1 OFFSET $2`,
+       LIMIT ? OFFSET ?`,
       [...params, pageSize, offset]
     );
 
@@ -55,7 +55,7 @@ router.get('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const [rows] = await pool.query(
-      `SELECT u.* FROM users u WHERE u.id = $1 LIMIT 1`,
+      `SELECT u.* FROM users u WHERE u.id = ? LIMIT 1`,
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
@@ -66,7 +66,7 @@ router.get('/:id', async (req, res) => {
               mt.name AS membership_type
        FROM registrations r
        JOIN membership_types mt ON r.membership_type_id = mt.id
-       WHERE r.user_id = $1
+       WHERE r.user_id = ?
        ORDER BY r.created_at DESC`,
       [id]
     );
@@ -106,7 +106,7 @@ router.post('/', async (req, res) => {
       `INSERT INTO users (
         first_name, middle_name, last_name, email, phone_number, alternative_phone, date_of_birth, gender, nationality,
         id_type, id_number, street_address, city, region, digital_address, professional_info, emergency_contact, profile_photo_url
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         u.first_name, u.middle_name ?? null, u.last_name, u.email, u.phone_number, u.alternative_phone ?? null,
         u.date_of_birth, u.gender, u.nationality ?? 'Ghanaian', u.id_type, u.id_number, u.street_address, u.city, u.region,
@@ -114,7 +114,7 @@ router.post('/', async (req, res) => {
       ]
     );
 
-    const [rows] = await pool.query(`SELECT * FROM users WHERE id = $1`, [result.insertId || u.id]);
+    const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [result.insertId || u.id]);
     try { await logAudit({ action: 'ADMIN_CREATE_USER', entity_type: 'user', entity_id: rows[0]?.id, new_values: { email: u.email }, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.status(201).json({ user: rows[0] });
   } catch (err) {
@@ -159,8 +159,8 @@ router.patch('/:id', async (req, res) => {
     }
     if (updates.length === 0) return res.status(400).json({ error: 'No updates' });
     params.push(id);
-    await pool.execute(`UPDATE users SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`, params);
-    const [rows] = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
+    await pool.execute(`UPDATE users SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, params);
+    const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [id]);
     try { await logAudit({ action: 'ADMIN_UPDATE_USER', entity_type: 'user', entity_id: id, new_values: body, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.json({ user: rows[0] });
   } catch (err) {

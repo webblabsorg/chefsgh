@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
        JOIN membership_types mt ON r.membership_type_id = mt.id
        WHERE ${where}
        ORDER BY r.membership_expiry ASC
-       LIMIT $1 OFFSET $2`,
+       LIMIT ? OFFSET ?`,
       [...params, pageSize, offset]
     );
 

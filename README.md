@@ -26,9 +26,10 @@ A full-stack membership registration system for the Ghana Chef Association with 
 
 ### Prerequisites
 - Node.js 18 or higher
-- MySQL database
+- Neon Postgres account (free tier available)
 - Paystack account (for payments)
 - Email server (SMTP)
+- GitHub account (for Vercel deployment)
 
 ### Installation
 
@@ -51,8 +52,11 @@ A full-stack membership registration system for the Ghana Chef Association with 
    ```
 
 4. **Set up database**
-   - Import `database.sql` into your MySQL database
-   - Update MySQL credentials in `.env`
+   - Create account at https://console.neon.tech
+   - Create new Postgres project
+   - Import `database-postgres.sql` in SQL Editor
+   - Copy DATABASE_URL to `.env`
+   - See [NEON_SETUP.md](./NEON_SETUP.md) for details
 
 5. **Run development server**
    ```bash
@@ -63,30 +67,40 @@ A full-stack membership registration system for the Ghana Chef Association with 
    npm run server
    ```
 
-## 📦 Deployment
+## 📦 Deployment to Vercel
 
-### Deploy to Vercel (Recommended)
+### Complete Setup (3 Steps)
 
-See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for complete instructions.
+#### Step 1: Setup Database
+See [NEON_SETUP.md](./NEON_SETUP.md)
+- Create Neon Postgres account
+- Import schema
+- Get connection string
 
-**Quick steps:**
-1. Push code to GitHub
-2. Import project to Vercel
-3. Add environment variables
-4. Deploy!
+#### Step 2: Push to GitHub
+```bash
+git add .
+git commit -m "Ready for Vercel deployment"
+git push origin main
+```
 
-### Deploy to Render
+#### Step 3: Deploy to Vercel
+See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
+- Import from GitHub
+- Add environment variables
+- Deploy!
 
-See [DEPLOY_API_TO_RENDER.md](./DEPLOY_API_TO_RENDER.md) for API deployment.
+**Your app runs ENTIRELY on Vercel** (frontend + backend serverless functions)
 
 ## 🔧 Technology Stack
 
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Radix UI
 - **Backend**: Express.js, Node.js
-- **Database**: MySQL
+- **Database**: Neon Postgres (serverless)
 - **Payment**: Paystack
 - **Authentication**: JWT + HTTP-only cookies
 - **Email**: Nodemailer
+- **Deployment**: Vercel (frontend + backend)
 
 ## 📝 Git Setup (Manual)
 
@@ -113,21 +127,19 @@ git push -u origin main
 
 ## 📚 Documentation
 
-- **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Deploy to Vercel
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - General deployment guide
+- **[NEON_SETUP.md](./NEON_SETUP.md)** ⭐ Start here - Database setup
+- **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Complete Vercel guide
+- **[POSTGRES_CONVERSION_SUMMARY.md](./POSTGRES_CONVERSION_SUMMARY.md)** - What changed from MySQL
+- **[database-postgres.sql](./database-postgres.sql)** - Postgres schema
 - **[SETUP.md](./SETUP.md)** - Initial setup instructions
-- **[database.sql](./database.sql)** - Database schema
 
 ## 🔑 Environment Variables
 
 Key variables needed (see `.env.example` for complete list):
 
 ```env
-# Database
-MYSQL_HOST=your-host
-MYSQL_DATABASE=chefs_db
-MYSQL_USER=your-user
-MYSQL_PASSWORD=your-password
+# Database (Neon Postgres)
+DATABASE_URL=postgresql://user:pass@host.neon.tech/db?sslmode=require
 
 # Paystack
 VITE_PAYSTACK_PUBLIC_KEY=pk_live_xxx
@@ -145,6 +157,10 @@ ADMIN_EMAIL=admin@example.com
 # Admin Seed
 ADMIN_SEED_EMAIL=admin@example.com
 ADMIN_SEED_PASSWORD=your-admin-password
+
+# App
+NODE_ENV=production
+CLIENT_ORIGIN=https://your-app.vercel.app
 ```
 
 ## 🧪 Testing

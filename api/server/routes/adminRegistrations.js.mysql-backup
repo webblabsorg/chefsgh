@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
        JOIN membership_types mt ON r.membership_type_id = mt.id
        WHERE ${where}
        ORDER BY r.created_at DESC
-       LIMIT $1 OFFSET $2`,
+       LIMIT ? OFFSET ?`,
       [...params, pageSize, offset]
     );
 
@@ -67,7 +67,7 @@ router.get('/:id', async (req, res) => {
        FROM registrations r
        JOIN users u ON r.user_id = u.id
        JOIN membership_types mt ON r.membership_type_id = mt.id
-       WHERE r.id = $1 LIMIT 1`,
+       WHERE r.id = ? LIMIT 1`,
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
@@ -75,7 +75,7 @@ router.get('/:id', async (req, res) => {
     const regUser = rows[0];
     // Fetch payment details if needed
     const [payRows] = await pool.query(
-      `SELECT * FROM payments WHERE id = $1 LIMIT 1`,
+      `SELECT * FROM payments WHERE id = ? LIMIT 1`,
       [regUser.payment_id]
     );
 
@@ -101,9 +101,9 @@ router.patch('/:id', async (req, res) => {
     if (membership_expiry) { updates.push('membership_expiry = ?'); params.push(membership_expiry); }
     if (updates.length === 0) return res.status(400).json({ error: 'No updates' });
     params.push(id);
-    await pool.execute(`UPDATE registrations SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`, params);
+    await pool.execute(`UPDATE registrations SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, params);
     const [rows] = await pool.query(
-      `SELECT r.id, r.membership_id, r.membership_status, r.membership_expiry FROM registrations r WHERE r.id = $1`,
+      `SELECT r.id, r.membership_id, r.membership_status, r.membership_expiry FROM registrations r WHERE r.id = ?`,
       [id]
     );
     try { await logAudit({ action: 'ADMIN_UPDATE_REGISTRATION', entity_type: 'registration', entity_id: id, new_values: { membership_status, membership_expiry }, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
@@ -121,7 +121,7 @@ router.post('/:id/resend-email', async (req, res) => {
     const [rows] = await pool.query(
       `SELECT en.subject, en.body, en.recipient_email
        FROM email_notifications en
-       WHERE en.registration_id = $1
+       WHERE en.registration_id = ?
        ORDER BY en.created_at DESC
        LIMIT 1`,
       [id]

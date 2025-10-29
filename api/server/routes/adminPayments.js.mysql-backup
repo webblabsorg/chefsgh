@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
        FROM payments
        WHERE ${where}
        ORDER BY COALESCE(paid_at, created_at) DESC
-       LIMIT $1 OFFSET $2`,
+       LIMIT ? OFFSET ?`,
       [...params, pageSize, offset]
     );
 
@@ -54,7 +54,7 @@ router.get('/:id', async (req, res) => {
     const id = req.params.id;
     const [payRows] = await pool.query(
       `SELECT id, reference, gateway, status, amount, currency, channel, paid_at, metadata, customer_email, created_at
-       FROM payments WHERE id = $1 LIMIT 1`,
+       FROM payments WHERE id = ? LIMIT 1`,
       [id]
     );
     if (payRows.length === 0) return res.status(404).json({ error: 'Not found' });
@@ -65,7 +65,7 @@ router.get('/:id', async (req, res) => {
               mt.name AS membership_type
        FROM registrations r
        JOIN membership_types mt ON r.membership_type_id = mt.id
-       WHERE r.payment_id = $1
+       WHERE r.payment_id = ?
        LIMIT 1`,
       [id]
     );

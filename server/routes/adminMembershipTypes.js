@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
   try {
     const includeInactive = String(req.query.includeInactive || 'true') === 'true';
     const where = includeInactive ? '1=1' : 'is_active = TRUE';
-    const [rows] = await pool.query(
+    const { rows } = await pool.query(
       `SELECT id, name, slug, description, price, benefits, is_active, created_at, updated_at
        FROM membership_types
        WHERE ${where}
@@ -50,12 +50,12 @@ router.post('/', async (req, res) => {
     });
     const b = schema.parse(req.body || {});
     const benefits = parseBenefits(b.benefits);
-    const [result] = await pool.execute(
+    const { rows } = await pool.query(
       `INSERT INTO membership_types (name, slug, description, price, benefits, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
       [b.name, b.slug, b.description || null, b.price, JSON.stringify(benefits), b.is_active !== false]
     );
-    const [rows] = await pool.query(`SELECT * FROM membership_types WHERE id = $1`, [result.insertId || b.id]);
     try { await logAudit({ action: 'ADMIN_CREATE_MEMBERSHIP_TYPE', entity_type: 'membership_type', entity_id: rows[0]?.id, new_values: { name: b.name, slug: b.slug }, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.status(201).json({ membershipType: rows[0] });
   } catch (err) {
@@ -83,18 +83,18 @@ router.patch('/:id', async (req, res) => {
     for (const k of allowed) {
       if (body[k] !== undefined) {
         if (k === 'benefits') {
-          updates.push('benefits = ?');
+          updates.push(`benefits = $${params.length + 1}`);
           params.push(JSON.stringify(parseBenefits(body[k])));
         } else {
-          updates.push(`${k} = ?`);
+          updates.push(`${k} = $${params.length + 1}`);
           params.push(body[k]);
         }
       }
     }
     if (updates.length === 0) return res.status(400).json({ error: 'No updates' });
     params.push(id);
-    await pool.execute(`UPDATE membership_types SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`, params);
-    const [rows] = await pool.query(`SELECT * FROM membership_types WHERE id = $1`, [id]);
+    await pool.query(`UPDATE membership_types SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${params.length}`, params);
+    const { rows } = await pool.query(`SELECT * FROM membership_types WHERE id = $1`, [id]);
     try { await logAudit({ action: 'ADMIN_UPDATE_MEMBERSHIP_TYPE', entity_type: 'membership_type', entity_id: id, new_values: body, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.json({ membershipType: rows[0] });
   } catch (err) {
@@ -107,9 +107,9 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const [refRows] = await pool.query('SELECT id FROM registrations WHERE membership_type_id = ? LIMIT 1', [id]);
+    const { rows: refRows } = await pool.query('SELECT id FROM registrations WHERE membership_type_id = $1 LIMIT 1', [id]);
     if (refRows.length > 0) return res.status(409).json({ error: 'Cannot delete type in use' });
-    await pool.execute('DELETE FROM membership_types WHERE id = ?', [id]);
+    await pool.query('DELETE FROM membership_types WHERE id = $1', [id]);
     try { await logAudit({ action: 'ADMIN_DELETE_MEMBERSHIP_TYPE', entity_type: 'membership_type', entity_id: id, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' }); } catch {}
     res.json({ ok: true });
   } catch (err) {

@@ -6,8 +6,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Login from './admin/pages/Login';
-import ForgotPassword from './admin/pages/ForgotPassword';
-import ResetPassword from './admin/pages/ResetPassword';
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/pages/Dashboard';
 import Registrations from './admin/pages/Registrations';

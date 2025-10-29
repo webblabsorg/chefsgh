@@ -2,37 +2,29 @@ import pg from 'pg';
 const { Pool } = pg;
 
 const requiredEnv = ['DATABASE_URL'];
-
-requiredEnv.forEach((key) => {
+for (const key of requiredEnv) {
   if (!process.env[key]) {
     throw new Error(`Missing environment variable: ${key}`);
   }
-});
+}
 
 // Neon Postgres connection pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
-  max: 20,
+  ssl: { rejectUnauthorized: false },
+  max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
 
-// Test connection
+// Log basic lifecycle events; never exit the process in serverless
 pool.on('connect', () => {
-  console.log('Connected to Neon Postgres database');
+  console.log('pg pool: client connected');
 });
-
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
+  console.error('pg pool error (idle client):', err?.message || err);
 });
 
-export const getConnection = async () => {
-  return pool.connect();
-};
-
+export const getConnection = async () => pool.connect();
 export { pool };
 export default pool;

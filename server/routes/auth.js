@@ -17,12 +17,12 @@ router.post('/login', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, keyGenerato
 
     const identifier = email || username;
     const byField = email ? 'email' : 'username';
-    const [rows] = await pool.execute(
+    const { rows } = await pool.query(
       `SELECT id, email, username, full_name, password_hash, role, is_active
        FROM admin_users WHERE ${byField} = $1 LIMIT 1`,
       [identifier]
     );
-    if (rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!rows || rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
     const admin = rows[0];
     if (!admin.is_active) return res.status(403).json({ error: 'Account disabled' });
 
@@ -78,11 +78,11 @@ router.post('/forgot', rateLimit({ windowMs: 60 * 60 * 1000, max: 10, keyGenerat
     const { email } = req.body || {};
     if (!email) return res.json({ ok: true }); // generic response
 
-    const [rows] = await pool.execute(
+    const { rows } = await pool.query(
       `SELECT id, email, full_name, is_active FROM admin_users WHERE email = $1 LIMIT 1`,
       [email]
     );
-    if (rows.length === 0 || rows[0].is_active === 0) {
+    if (!rows || rows.length === 0 || rows[0].is_active === 0 || rows[0].is_active === false) {
       return res.json({ ok: true }); // do not leak
     }
 
@@ -141,12 +141,12 @@ router.post('/reset', async (req, res) => {
     if (!payload || payload.purpose !== 'reset') return res.status(400).json({ error: 'Invalid token' });
 
     const adminId = payload.id;
-    const [rows] = await pool.execute('SELECT id, is_active FROM admin_users WHERE id = ? LIMIT 1', [adminId]);
-    if (rows.length === 0 || rows[0].is_active === 0) return res.status(400).json({ error: 'Invalid token' });
+    const { rows } = await pool.query('SELECT id, is_active FROM admin_users WHERE id = $1 LIMIT 1', [adminId]);
+    if (!rows || rows.length === 0 || rows[0].is_active === 0 || rows[0].is_active === false) return res.status(400).json({ error: 'Invalid token' });
 
     const bcrypt = (await import('bcryptjs')).default;
     const hash = await bcrypt.hash(String(password), 10);
-    await pool.execute('UPDATE admin_users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [hash, adminId]);
+    await pool.query('UPDATE admin_users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [hash, adminId]);
     return res.json({ ok: true });
   } catch (err) {
     console.error('Reset password failed', err);

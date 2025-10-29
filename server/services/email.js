@@ -3,22 +3,24 @@ import { pool } from '../db.js';
 
 const supportEmail = process.env.SUPPORT_EMAIL || 'support@chefsghana.com';
 
-const requiredEnv = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASSWORD'];
-requiredEnv.forEach((key) => {
-  if (!process.env[key]) {
-    throw new Error(`Missing environment variable: ${key}`);
+let cachedTransporter = null;
+function getTransporter() {
+  if (cachedTransporter) return cachedTransporter;
+  const host = process.env.EMAIL_HOST;
+  const port = Number(process.env.EMAIL_PORT || 0);
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASSWORD;
+  if (!host || !port || !user || !pass) {
+    throw new Error('Email is not configured: set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD');
   }
-});
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
-  secure: process.env.EMAIL_SECURE === 'true' || Number(process.env.EMAIL_PORT) === 465,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+  cachedTransporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: process.env.EMAIL_SECURE === 'true' || port === 465,
+    auth: { user, pass },
+  });
+  return cachedTransporter;
+}
 
 const renderListItems = (items = []) =>
   items
@@ -111,9 +113,10 @@ export const sendRegistrationEmail = async (details) => {
   };
 
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail(mailOptions);
 
-    await pool.execute(
+    await pool.query(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, sent_at)
        VALUES ($1, $2, $3, $4, 'sent', NOW())`,
       [details.registrationId ?? null, supportEmail, mailOptions.subject, html]
@@ -121,7 +124,7 @@ export const sendRegistrationEmail = async (details) => {
 
     return info;
   } catch (error) {
-    await pool.execute(
+    await pool.query(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, error_message, created_at)
        VALUES ($1, $2, $3, $4, 'failed', $5, NOW())`,
       [details.registrationId ?? null, supportEmail, mailOptions.subject, html, error.message]
@@ -141,15 +144,16 @@ export const sendHtmlEmail = async ({ to, subject, html, registrationId = null }
   };
 
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail(mailOptions);
-    await pool.execute(
+    await pool.query(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, sent_at)
        VALUES ($1, $2, $3, $4, 'sent', NOW())`,
       [registrationId, mailOptions.to, subject, html]
     );
     return info;
   } catch (error) {
-    await pool.execute(
+    await pool.query(
       `INSERT INTO email_notifications (registration_id, recipient_email, subject, body, status, error_message, created_at)
        VALUES ($1, $2, $3, $4, 'failed', $5, NOW())`,
       [registrationId, mailOptions.to, subject, html, error.message]

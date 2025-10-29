@@ -34,11 +34,20 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const corsOrigins = process.env.CLIENT_ORIGIN
-  ? process.env.CLIENT_ORIGIN.split(',').map((origin) => origin.trim())
-  : '*';
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+  : [];
 
-app.use(cors({ origin: corsOrigins, credentials: true }));
+// Reflect origin for credentials; if CLIENT_ORIGIN not set, allow all origins
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // same-origin or curl
+    if (allowedOrigins.length === 0) return callback(null, true);
+    const ok = allowedOrigins.includes(origin);
+    return callback(ok ? null : new Error('Not allowed by CORS'), ok);
+  },
+  credentials: true,
+}));
 app.use(securityHeaders());
 
 // Webhook route must come BEFORE express.json() to receive raw body for signature verification

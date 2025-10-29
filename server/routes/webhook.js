@@ -51,7 +51,7 @@ async function handleSuccessfulPayment(data) {
     const { reference, amount, customer, metadata } = data;
 
     // Update payment status in database
-    await pool.execute(
+    await pool.query(
       `UPDATE payments 
        SET status = 'completed', 
            paid_at = NOW(),
@@ -61,7 +61,7 @@ async function handleSuccessfulPayment(data) {
     );
 
     // Update registration status
-    await pool.execute(
+    await pool.query(
       `UPDATE registrations 
        SET status = 'active' 
        WHERE id IN (
@@ -85,7 +85,7 @@ async function handleFailedPayment(data) {
     const { reference } = data;
 
     // Update payment status
-    await pool.execute(
+    await pool.query(
       `UPDATE payments 
        SET status = 'failed' 
        WHERE reference = $1`,

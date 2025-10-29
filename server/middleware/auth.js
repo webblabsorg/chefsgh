@@ -55,11 +55,11 @@ export async function requireAdmin(req, res, next) {
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const decoded = jwt.verify(token, JWT_SECRET);
     // Verify in DB and ensure active
-    const [rows] = await pool.execute(
-      'SELECT id, email, username, full_name, role, is_active FROM admin_users WHERE id = ? LIMIT 1',
+    const { rows } = await pool.query(
+      'SELECT id, email, username, full_name, role, is_active FROM admin_users WHERE id = $1 LIMIT 1',
       [decoded.id]
     );
-    if (rows.length === 0 || rows[0].is_active === 0) {
+    if (!rows || rows.length === 0 || rows[0].is_active === 0 || rows[0].is_active === false) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     req.admin = rows[0];

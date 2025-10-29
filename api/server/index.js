@@ -86,6 +86,12 @@ const port = process.env.API_PORT ? Number(process.env.API_PORT) : 4000;
 // Seed initial admin if configured
 seedInitialAdmin().catch(() => {});
 
-app.listen(port, () => {
-  console.log(`API server listening on port ${port}`);
-});
+// Only start server if not in serverless environment (Vercel)
+if (process.env.VERCEL !== '1') {
+  app.listen(port, () => {
+    console.log(`API server listening on port ${port}`);
+  });
+}
+
+// Export for Vercel serverless
+export default app;

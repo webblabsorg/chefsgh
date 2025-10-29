@@ -4,11 +4,17 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "/api/server/index.js"
+      "destination": "/api"
     },
     {
       "source": "/admin/:path*",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 }

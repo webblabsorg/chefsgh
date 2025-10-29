@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghana Chef Association - Deployment Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #4a90e2;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .test-group {
+            margin-bottom: 20px;
+        }
+        .test-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .test-item:hover {
+            background: #f5f5f5;
+            border-color: #4a90e2;
+        }
+        .test-link {
+            flex: 1;
+            text-decoration: none;
+            color: #4a90e2;
+            font-weight: 500;
+            font-size: 1.05em;
+        }
+        .test-link:hover {
+            text-decoration: underline;
+        }
+        .status {
+            width: 100px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-align: center;
+            font-weight: 600;
+            background: #e0e0e0;
+            color: #666;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .description {
+            color: #666;
+            font-size: 0.95em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .credentials {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .credentials strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #856404;
+        }
+        .credentials code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #357abd;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.secondary:hover {
+            background: #5a6268;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert.warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+        .alert.info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            color: #0c5460;
+        }
+        .alert.success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .doc-card {
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+        }
+        .doc-card:hover {
+            border-color: #4a90e2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .doc-card h3 {
+            color: #4a90e2;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .doc-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 Ghana Chef Association</h1>
+        <p class="subtitle">Deployment Test & Verification Dashboard</p>
+
+        <div class="alert warning">
+            <strong>⚠️ Before Testing:</strong> Make sure you've deployed all files to your server and the Node.js API server is running!
+        </div>
+
+        <!-- Server Status Tests -->
+        <div class="section">
+            <h2>1️⃣ Server Status Tests</h2>
+            <p style="margin-bottom: 15px;">These tests verify that your API server is running correctly.</p>
+            
+            <div class="test-group">
+                <div class="test-item">
+                    <div style="flex: 1;">
+                        <a href="https://chefsghana.com/api/health" target="_blank" class="test-link">
+                            API Health Check
+                        </a>
+                        <div class="description">Should return: {"status":"ok"}</div>
+                    </div>
+                    <span class="status" data-test="health">Untested</span>
+                </div>
+
+                <div class="test-item">
+                    <div style="flex: 1;">
+                        <a href="https://chefsghana.com/api/membership-types" target="_blank" class="test-link">
+                            Membership Types API
+                        </a>
+                        <div class="description">Should return: Array of membership types</div>
+                    </div>
+                    <span class="status" data-test="membership">Untested</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frontend Tests -->
+        <div class="section">
+            <h2>2️⃣ Frontend Tests</h2>
+            <p style="margin-bottom: 15px;">Verify that the main website loads correctly.</p>
+            
+            <div class="test-group">
+                <div class="test-item">
+                    <div style="flex: 1;">
+                        <a href="https://chefsghana.com" target="_blank" class="test-link">
+                            Main Website (Registration Form)
+                        </a>
+                        <div class="description">Should show the registration form with all fields</div>
+                    </div>
+                    <span class="status">Manual</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel Tests -->
+        <div class="section">
+            <h2>3️⃣ Admin Panel Tests</h2>
+            <p style="margin-bottom: 15px;">Test the admin dashboard and login functionality.</p>
+            
+            <div class="test-group">
+                <div class="test-item">
+                    <div style="flex: 1;">
+                        <a href="https://chefsghana.com/admin" target="_blank" class="test-link">
+                            Admin Login Page
+                        </a>
+                        <div class="description">Should display login form (email & password fields)</div>
+                    </div>
+                    <span class="status">Manual</span>
+                </div>
+            </div>
+
+            <div class="credentials">
+                <strong>Admin Credentials (Default):</strong>
+                <div style="margin-top: 10px;">
+                    Email: <code>admin@chefsghana.com</code><br>
+                    Password: <code>your-admin-password</code>
+                </div>
+                <div style="margin-top: 10px; color: #856404; font-size: 0.9em;">
+                    ⚠️ Check your .env file on the server for ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD
+                </div>
+            </div>
+
+            <a href="https://chefsghana.com/admin" target="_blank" class="button">
+                Go to Admin Login
+            </a>
+        </div>
+
+        <!-- Documentation -->
+        <div class="section">
+            <h2>📚 Documentation</h2>
+            <p style="margin-bottom: 15px;">Quick links to troubleshooting guides and documentation.</p>
+            
+            <div class="docs-grid">
+                <div class="doc-card">
+                    <h3>📄 Quick Reference</h3>
+                    <p>One-page quick fix guide</p>
+                    <small style="color: #999;">QUICK_REFERENCE.txt</small>
+                </div>
+
+                <div class="doc-card">
+                    <h3>🚨 Urgent Fix Guide</h3>
+                    <p>Step-by-step admin login troubleshooting</p>
+                    <small style="color: #999;">URGENT_FIX_ADMIN_LOGIN.md</small>
+                </div>
+
+                <div class="doc-card">
+                    <h3>⚙️ Node.js Setup</h3>
+                    <p>Complete server setup instructions</p>
+                    <small style="color: #999;">DIRECTADMIN_NODE_SETUP.md</small>
+                </div>
+
+                <div class="doc-card">
+                    <h3>✅ Deployment Checklist</h3>
+                    <p>Full deployment verification list</p>
+                    <small style="color: #999;">DEPLOYMENT_CHECKLIST.md</small>
+                </div>
+
+                <div class="doc-card">
+                    <h3>🚀 Deployment Guide</h3>
+                    <p>Complete deployment instructions</p>
+                    <small style="color: #999;">README_DEPLOYMENT.md</small>
+                </div>
+
+                <div class="doc-card">
+                    <h3>🔍 Troubleshooting</h3>
+                    <p>Comprehensive troubleshooting guide</p>
+                    <small style="color: #999;">TROUBLESHOOTING_SUMMARY.md</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- What to Check -->
+        <div class="section">
+            <h2>🔍 What to Check After Testing</h2>
+            <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                <h3 style="margin-bottom: 15px; color: #333;">If API Health Check Fails (404 Error):</h3>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li style="margin-bottom: 10px;">Your Node.js server is NOT running</li>
+                    <li style="margin-bottom: 10px;">Follow <strong>DIRECTADMIN_NODE_SETUP.md</strong> to start the server</li>
+                    <li style="margin-bottom: 10px;">Check DirectAdmin "Node.js Selector" if available</li>
+                    <li style="margin-bottom: 10px;">Or use PM2 via SSH: <code style="background: #f5f5f5; padding: 2px 6px;">npm run pm2:start</code></li>
+                </ul>
+
+                <h3 style="margin: 25px 0 15px; color: #333;">If Admin Login Fails:</h3>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li style="margin-bottom: 10px;">Verify credentials in .env file (ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD)</li>
+                    <li style="margin-bottom: 10px;">Click "Forgot Password" and reset via email</li>
+                    <li style="margin-bottom: 10px;">Check admin_users table in phpMyAdmin</li>
+                    <li style="margin-bottom: 10px;">Follow <strong>URGENT_FIX_ADMIN_LOGIN.md</strong> for step-by-step fix</li>
+                </ul>
+
+                <h3 style="margin: 25px 0 15px; color: #333;">If Everything Works:</h3>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li style="margin-bottom: 10px;">✅ You're all set!</li>
+                    <li style="margin-bottom: 10px;">Test creating users, viewing registrations, payments</li>
+                    <li style="margin-bottom: 10px;">Test CSV export and import features</li>
+                    <li style="margin-bottom: 10px;">Verify email notifications are being sent</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <h2>⚡ Quick Actions</h2>
+            <a href="https://chefsghana.com/api/health" target="_blank" class="button">
+                Test API Server
+            </a>
+            <a href="https://chefsghana.com/admin" target="_blank" class="button">
+                Open Admin Panel
+            </a>
+            <a href="https://chefsghana.com" target="_blank" class="button secondary">
+                View Main Site
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; text-align: center;">
+            <p>Ghana Chef Association Registration System</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Last Updated: October 2024</p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-test health endpoint
+        fetch('https://chefsghana.com/api/health')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('API returned ' + response.status);
+            })
+            .then(data => {
+                if (data.status === 'ok') {
+                    const statusEl = document.querySelector('[data-test="health"]');
+                    statusEl.textContent = '✅ Online';
+                    statusEl.classList.add('success');
+                }
+            })
+            .catch(error => {
+                const statusEl = document.querySelector('[data-test="health"]');
+                statusEl.textContent = '❌ Offline';
+                statusEl.classList.add('error');
+                console.error('Health check failed:', error);
+            });
+
+        // Auto-test membership types endpoint
+        fetch('https://chefsghana.com/api/membership-types')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('API returned ' + response.status);
+            })
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    const statusEl = document.querySelector('[data-test="membership"]');
+                    statusEl.textContent = '✅ Working';
+                    statusEl.classList.add('success');
+                }
+            })
+            .catch(error => {
+                const statusEl = document.querySelector('[data-test="membership"]');
+                statusEl.textContent = '❌ Failed';
+                statusEl.classList.add('error');
+                console.error('Membership types check failed:', error);
+            });
+    </script>
+</body>
+</html>
